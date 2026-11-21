@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shlex
 import subprocess
 import sys
 from collections import Counter
@@ -74,6 +75,11 @@ def record(state: dict, event: str, detail: str = "") -> None:
     state["history"].append({"at": now(), "event": event, "detail": detail})
 
 
+def mark_timing(state: dict, stage: str) -> None:
+    """Record when a stage finished; old states without timings stay readable."""
+    state.setdefault("timings", {})[stage] = now()
+
+
 def has_code_changes(cwd: Path) -> bool:
     try:
         result = subprocess.run(
@@ -101,6 +107,7 @@ def cmd_init(args: argparse.Namespace) -> None:
         "status": "RUNNING",
         "compact": bool(args.compact),
         "gates": {gate: {"passed": False, "detail": ""} for gate in GATES},
+        "timings": {},
         "history": [],
     }
     record(state, "init", f"max_iterations={args.max_iterations} compact={args.compact}")
@@ -146,6 +153,7 @@ def cmd_complete(args: argparse.Namespace) -> None:
         check_artifact(target, stage, bool(state.get("compact")))
     elif stage == "implement" and not has_code_changes(Path.cwd()):
         die("stage implement requires at least one code change in the worktree")
+    mark_timing(state, stage)
     record(state, f"complete:{stage}", args.note or "")
     if stage == "handoff":
         failed = [g for g in GATES if not state["gates"][g]["passed"]]
@@ -167,7 +175,25 @@ def cmd_gate(args: argparse.Namespace) -> None:
         die(f"gate must be one of: {', '.join(GATES)}")
     if gate != state["stage"]:
         die(f'current stage is {state["stage"]}; gate {gate} belongs to that stage')
+
+    if args.run:
+        if not args.passed:
+            die("--run requires --passed")
+        if not args.evidence:
+            die("--run requires --evidence <file>")
+        proc = subprocess.run(
+            shlex.split(args.run), capture_output=True, text=True, check=False
+        )
+        evidence_file = Path(args.evidence).expanduser()
+        evidence_file.parent.mkdir(parents=True, exist_ok=True)
+        evidence_file.write_text(proc.stdout + proc.stderr)
+        args.detail = (args.detail + " | " if args.detail else "") + f"run={args.run!r}"
+        if proc.returncode != 0:
+            args.passed = False
+            args.detail += f" exit={proc.returncode}"
+
     state["gates"][gate] = {"passed": args.passed, "detail": args.detail or ""}
+    mark_timing(state, gate)
     record(state, f"gate:{gate}={'pass' if args.passed else 'fail'}", args.detail or "")
     if not args.passed:
         _loop_back(state, f"{gate} gate failed: {args.detail or 'no detail'}")
@@ -240,6 +266,20 @@ def cmd_resume(args: argparse.Namespace) -> None:
     print("RESUMED")
 
 
+def stage_duration_seconds(state: dict) -> dict[str, float]:
+    timings = state.get("timings") or {}
+    ordered = [s for s in STAGES if s in timings]
+    result: dict[str, float] = {}
+    for previous, current in zip(ordered, ordered[1:]):
+        try:
+            start = datetime.fromisoformat(timings[previous])
+            end = datetime.fromisoformat(timings[current])
+        except (TypeError, ValueError):
+            continue
+        result[current] = max(0.0, (end - start).total_seconds())
+    return result
+
+
 def cmd_telemetry(args: argparse.Namespace) -> None:
     roots = [Path(r).expanduser() for r in args.root]
     if not roots:
@@ -273,6 +313,16 @@ def cmd_telemetry(args: argparse.Namespace) -> None:
         for d in states if d.get("max_iterations")
     ]
     average = sum(utilisation) / len(utilisation) if utilisation else 0.0
+    timing_samples: dict[str, list[float]] = {}
+    for data in states:
+        for stage, seconds in stage_duration_seconds(data).items():
+            timing_samples.setdefault(stage, []).append(seconds)
+    timing_avg = {
+        stage: sum(values) / len(values) for stage, values in timing_samples.items()
+    }
+    timing_text = ", ".join(
+        f"{stage}: {seconds:.0f}s" for stage, seconds in sorted(timing_avg.items())
+    ) or "none"
 
     if args.format == "json":
         text = json.dumps({
@@ -280,6 +330,7 @@ def cmd_telemetry(args: argparse.Namespace) -> None:
             "statuses": dict(statuses), "stages": dict(stages),
             "gates": dict(gates), "failure_reasons": dict(reasons.most_common(10)),
             "average_iteration_utilisation": round(average, 2),
+            "average_stage_seconds": {k: round(v, 1) for k, v in timing_avg.items()},
             "details": [{k: d.get(k) for k in ("issue", "status", "stage", "iteration", "max_iterations")} for d in states],
         }, indent=2)
     else:
@@ -292,6 +343,7 @@ def cmd_telemetry(args: argparse.Namespace) -> None:
             f"- Gates: {', '.join(f'{k}: {v}' for k, v in sorted(gates.items())) or 'none'}",
             f"- Loop-backs recorded: {sum(reasons.values())}",
             f"- Average iteration utilisation: {average:.0%}",
+            f"- Stage timing: {timing_text}",
         ]
         if reasons:
             lines += ["", "## Top loop-back reasons", ""]
@@ -355,6 +407,7 @@ def main() -> None:
     p.set_defaults(passed=True)
     p.add_argument("--detail")
     p.add_argument("--evidence", help="required with --passed: file containing pass output")
+    p.add_argument("--run", help="execute this command and write its output to --evidence")
     p.add_argument("--pass-pattern", default="passed", help="marker expected in evidence (default: passed)")
     p.set_defaults(func=cmd_gate)
 

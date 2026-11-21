@@ -1,0 +1,15 @@
+{
+  "issue": "gate-run",
+  "created": "2026-11-21T00:00:00+00:00",
+  "max_iterations": 6,
+  "iteration": 1,
+  "stage": "review",
+  "status": "RUNNING",
+  "compact": false,
+  "gates": {
+    "review": {"passed": false, "detail": ""},
+    "verify": {"passed": false, "detail": ""}
+  },
+  "timings": {},
+  "history": []
+}

@@ -1,5 +1,7 @@
 # agent-workflow
 
+Version `0.2.0` — see [CHANGELOG.md](CHANGELOG.md).
+
 Harness-neutral delivery system for agents. Use it to make any code change — fix,
 feature, refactor or docs — pass the same gates before you review it.
 
@@ -12,9 +14,9 @@ feature, refactor or docs — pass the same gates before you review it.
 
 ## Repository layout
 - `skills/ship-*` — 12 skills: pipeline stages, loop, git, eval, fast lane, rulebook, teach.
-- `scripts/` — `doctor.py` (health check), `validate-skills.py` (cross-root sync).
-- `evals/` — 15 regression cases (`manifest.json`, fixtures).
-- `AGENTS.md`, `AGENT_RULES.md` — agent instructions and rulebook R-001…R-012.
+- `scripts/` — `doctor.py` (health check), `validate-skills.py` (cross-root sync), `detect-stack.py`, `check-docs.py`.
+- `evals/` — regression cases (`manifest.json`, fixtures).
+- `AGENTS.md`, `AGENT_RULES.md` — agent instructions and rulebook R-001…R-013.
 
 ## Use it
 Copy `skills/` into your harness skills path (e.g. `~/.agents/skills`, mirrored to
@@ -25,6 +27,9 @@ python3 -I scripts/install.py          # copy skills/scripts/evals into harness 
 python3 -I scripts/install.py --check  # verify all roots match this repo
 python3 -I scripts/doctor.py
 python3 -I skills/ship-eval/scripts/evalctl.py run
+python3 -I scripts/detect-stack.py --cwd /path/to/project
+python3 -I scripts/check-docs.py --root .
 ```
-`.github/workflows/validate.yml` runs the same install and checks on every push and PR.
-READY means ready for your review — never publish without fresh explicit approval.
+Gates can capture their own evidence: `loopctl gate <issue> verify --passed --run "pytest -q" --evidence verification.md`.
+`.github/workflows/validate.yml` runs install, doctor and evals on every push and PR.
+READY means ready for your review — publishing still needs your explicit approval and a user-supplied token.

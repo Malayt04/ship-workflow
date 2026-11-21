@@ -26,6 +26,7 @@ def main() -> int:
     checks = []
     checks.append(("cross-root sync", run("cross-root sync", [sys.executable, str(SCRIPTS / "validate-skills.py")])))
     checks.append(("skill evals", run("skill evals", [sys.executable, str(SKILLS / "ship-eval/scripts/evalctl.py"), "run"])))
+    checks.append(("doc links", run("doc links", [sys.executable, str(SCRIPTS / "check-docs.py"), "--root", str(Path.cwd())])))
 
     stale = []
     wrong_path = []

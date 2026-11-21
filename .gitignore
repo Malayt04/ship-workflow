@@ -4,6 +4,8 @@
 !/AGENTS.md
 !/AGENT_RULES.md
 !/README.md
+!/CHANGELOG.md
+!/VERSION
 !/scripts/
 !/.github/
 !/evals/
@@ -21,4 +23,5 @@ __pycache__/
 .agent-work/
 !/evals/fixtures/*/.agent-work/
 evals/last-report.md
+evals/fixtures/approval-*.json
 /evals/fixtures/git-repo/
