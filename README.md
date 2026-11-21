@@ -1,13 +1,27 @@
 # agent-workflow
 
-Shared, harness-neutral agent system (Claude Code, OpenCode, Codex): the `ship-*`
-skills, their scripts, regression evals, and the global rulebook.
+Harness-neutral delivery system for agents. Use it to make any code change — fix,
+feature, refactor or docs — pass the same gates before you review it.
 
-- `skills/ship-*` — pipeline stages (intake → implement → impact → requirements → review → verify → handoff), `ship-loop`, `ship-fastlane`, `ship-git`, `ship-eval`, `ship-rulebook`, `ship-teach`
-- `scripts/` — `doctor.py` (system health), `validate-skills.py` (cross-root sync)
-- `evals/` — deterministic regression cases (`manifest.json`, `fixtures/`)
-- `AGENT_RULES.md`, `AGENTS.md` — rulebook and harness-wide instructions
+## What it gives you
+- Closed loop: intake → implement → impact → requirements → review → verify → handoff.
+- Evidence gates: READY requires review.md and verification.md with saved output.
+- One Git standard: branches `<type>(<base>)/<slug>`, commits `<type>: ...`, PR titles `<type>(<base>): ...`.
+- Publishing approval: `ship-git guard-push` blocks pushes until you explicitly approve.
+- Fast lane for ≤2 files / ≤40 changed lines; skills stay task-agnostic via stack adapters.
 
-Check health: `python3 -I scripts/doctor.py`
+## Repository layout
+- `skills/ship-*` — 12 skills: pipeline stages, loop, git, eval, fast lane, rulebook, teach.
+- `scripts/` — `doctor.py` (health check), `validate-skills.py` (cross-root sync).
+- `evals/` — 15 regression cases (`manifest.json`, fixtures).
+- `AGENTS.md`, `AGENT_RULES.md` — agent instructions and rulebook R-001…R-012.
 
-Publishing is gated: never push without explicit approval (`ship-git guard-push`).
+## Use it
+Copy `skills/` into your harness skills path (e.g. `~/.agents/skills`, mirrored to
+`~/.config/opencode/skills` and `~/.claude/skills`), then ask an agent to make a
+change; `ship-pipeline` runs automatically.
+```bash
+python3 -I scripts/doctor.py
+python3 -I skills/ship-eval/scripts/evalctl.py run
+```
+READY means ready for your review — never publish without fresh explicit approval.
