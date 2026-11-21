@@ -134,6 +134,7 @@ deterministic guardrail, not by prompting harder.
 | R-011 | 2026-11-21 | approved | user | repeated work becomes a reusable script |
 | R-012 | 2026-11-21 | approved | user | gated fast lane for small, low-risk changes |
 | R-013 | 2026-11-21 | approved | user | publish approval requires a user-supplied token; agent self-approval is rejected |
+| R-014 | 2026-11-21 | approved | user | PRs must target the default branch; stacked PRs are rejected by CI |
 
 ## Retired rules
 

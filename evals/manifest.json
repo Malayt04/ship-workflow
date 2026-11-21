@@ -202,5 +202,19 @@
     "command": "python3 ~/.agents/skills/ship-loop/scripts/loopctl.py telemetry --root ~/.agents/evals/fixtures/timing/.agent-work",
     "expect_exit": 0,
     "expect_out": "Stage timing: impact: 3s"
+  },
+  {
+    "id": "git-pr-base-valid",
+    "skill": "ship-git",
+    "command": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py check-pr-base --base main",
+    "expect_exit": 0,
+    "expect_out": "PR BASE OK: main"
+  },
+  {
+    "id": "git-pr-base-reject-stacked",
+    "skill": "ship-git",
+    "command": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py check-pr-base --base \"feat(main)/installer-and-ci\"",
+    "expect_exit": 2,
+    "expect_out": "PR base must be 'main'"
   }
 ]
