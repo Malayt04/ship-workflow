@@ -13,6 +13,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: PR targets the default branch
+        if: github.event_name == 'pull_request'
+        env:
+          PR_BASE: ${{ github.base_ref }}
+        run: python3 -I skills/ship-git/scripts/gitctl.py check-pr-base --base "$PR_BASE"
       - name: Install skills and tooling
         run: python3 -I scripts/install.py
       - name: System health

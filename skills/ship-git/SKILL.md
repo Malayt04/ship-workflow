@@ -51,3 +51,8 @@ python $G install-hooks --repo /path/to/repo     # ask first
 Drop `--dry-run` to create and switch the branch. Pipeline: stage 0 create
 branch, stage 2 validate each commit, stage 7 handoff states
 `NOT pushed, no PR opened` unless explicitly approved.
+
+Every PR must target the default branch. CI checks `github.base_ref`; local
+checks can use `python $G check-pr-base --pr <number>` or `--base <branch>`.
+Stacked PRs merge into intermediate branches and leave the default branch
+behind, so they are rejected (R-014).

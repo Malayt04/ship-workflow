@@ -16,7 +16,7 @@ feature, refactor or docs — pass the same gates before you review it.
 - `skills/ship-*` — 12 skills: pipeline stages, loop, git, eval, fast lane, rulebook, teach.
 - `scripts/` — `doctor.py` (health check), `validate-skills.py` (cross-root sync), `detect-stack.py`, `check-docs.py`.
 - `evals/` — regression cases (`manifest.json`, fixtures).
-- `AGENTS.md`, `AGENT_RULES.md` — agent instructions and rulebook R-001…R-013.
+- `AGENTS.md`, `AGENT_RULES.md` — agent instructions and rulebook R-001…R-014.
 
 ## Use it
 Copy `skills/` into your harness skills path (e.g. `~/.agents/skills`, mirrored to

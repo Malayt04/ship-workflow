@@ -212,6 +212,25 @@ def cmd_guard_push(args: argparse.Namespace) -> None:
     print(f"APPROVED: push allowed for {payload.get('issue')} until {payload['expires']}")
 
 
+def cmd_check_pr_base(args: argparse.Namespace) -> None:
+    if bool(args.pr) == bool(args.base):
+        die("provide exactly one of --pr <number> or --base <branch>")
+    if args.pr:
+        result = run([
+            "gh", "pr", "view", str(args.pr),
+            "--json", "baseRefName", "--jq", ".baseRefName",
+        ])
+        base = result.stdout.strip()
+    else:
+        base = args.base.strip()
+    if base != args.expected:
+        die(
+            f"PR base must be {args.expected!r}; got {base!r}. "
+            "Stack PRs merge into intermediate branches and leave the default branch behind."
+        )
+    print(f"PR BASE OK: {base}")
+
+
 COMMIT_MSG_HOOK = """#!/bin/sh
 # Installed by ship-git. Validates conventional commit subjects.
 exec python3 "$HOME/.agents/skills/ship-git/scripts/gitctl.py" commit-msg --file "$1"
@@ -268,6 +287,13 @@ def main() -> None:
     p = sub.add_parser("guard-push")
     p.add_argument("--issue")
     p.set_defaults(func=cmd_guard_push)
+
+    p = sub.add_parser("check-pr-base")
+    group = p.add_mutually_exclusive_group(required=True)
+    group.add_argument("--pr", help="PR number to inspect with gh")
+    group.add_argument("--base", help="base branch to validate directly")
+    p.add_argument("--expected", default="main")
+    p.set_defaults(func=cmd_check_pr_base)
 
     p = sub.add_parser("install-hooks")
     p.add_argument("--repo", required=True)
