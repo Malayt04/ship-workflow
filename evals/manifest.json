@@ -173,5 +173,34 @@
     },
     "expect_exit": 0,
     "expect_out": "APPROVED"
+  },
+  {
+    "id": "loop-gate-run-captures-evidence",
+    "skill": "ship-loop",
+    "setup": "cp ~/.agents/evals/fixtures/gate-run/loop-state.template.json ~/.agents/evals/fixtures/gate-run/.agent-work/gate-run/loop-state.json",
+    "command": "python3 ~/.agents/skills/ship-loop/scripts/loopctl.py --work-root ~/.agents/evals/fixtures/gate-run/.agent-work gate gate-run review --passed --run \"echo passed\" --evidence ~/.agents/evals/fixtures/gate-run/evidence/review.txt",
+    "expect_exit": 0,
+    "expect_out": "GATE PASS"
+  },
+  {
+    "id": "stack-detect-node",
+    "skill": "stack-detection",
+    "command": "python3 ~/.agents/scripts/detect-stack.py --cwd ~/.agents/evals/fixtures/stack-node",
+    "expect_exit": 0,
+    "expect_out": "STACK: node"
+  },
+  {
+    "id": "docs-links-valid",
+    "skill": "doc-checks",
+    "command": "python3 ~/.agents/scripts/check-docs.py --root ~/.agents",
+    "expect_exit": 0,
+    "expect_out": "DOC LINKS OK"
+  },
+  {
+    "id": "loop-stage-timing",
+    "skill": "ship-loop",
+    "command": "python3 ~/.agents/skills/ship-loop/scripts/loopctl.py telemetry --root ~/.agents/evals/fixtures/timing/.agent-work",
+    "expect_exit": 0,
+    "expect_out": "Stage timing: impact: 3s"
   }
 ]

@@ -1,0 +1,29 @@
+{
+  "issue": "gate-run",
+  "created": "2026-11-21T00:00:00+00:00",
+  "max_iterations": 6,
+  "iteration": 1,
+  "stage": "verify",
+  "status": "RUNNING",
+  "compact": false,
+  "gates": {
+    "review": {
+      "passed": true,
+      "detail": "run='echo passed' | evidence=/Users/malaytiwari/.agents/evals/fixtures/gate-run/evidence/review.txt"
+    },
+    "verify": {
+      "passed": false,
+      "detail": ""
+    }
+  },
+  "timings": {
+    "review": "2026-11-21T07:31:56+00:00"
+  },
+  "history": [
+    {
+      "at": "2026-11-21T07:31:56+00:00",
+      "event": "gate:review=pass",
+      "detail": "run='echo passed'"
+    }
+  ]
+}

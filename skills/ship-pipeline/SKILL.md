@@ -12,8 +12,9 @@ blast radius (`impact.md`), review passed (`review.md`), runtime works
 
 ## Routing
 
-1. Detect the stack from manifests: `composer.json`, `go.mod`, `Cargo.toml`,
-   `package.json`, `pyproject.toml`, `Makefile`.
+1. Detect the stack with `python3 -I scripts/detect-stack.py --cwd <repo>` (falls
+   back to manifest inspection: `composer.json`, `go.mod`, `Cargo.toml`,
+   `package.json`, `pyproject.toml`, `Makefile`).
 2. Run `fastlane.py check`. If eligible, hand off to `ship-fastlane` and stop.
 3. Otherwise use this pipeline. Stack commands live in each stage's
    `references/stacks.md`; never hardcode WordPress commands into a generic stage.
