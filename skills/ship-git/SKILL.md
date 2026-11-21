@@ -17,11 +17,14 @@ are fine.
 ```bash
 G=~/.agents/skills/ship-git/scripts/gitctl.py
 python $G guard-push --issue <id>      # exit 2 without approval
-python $G approve --issue <id> --minutes 30   # only after user says "push"
+# Token comes from the user, never from the agent:
+export SHIP_APPROVAL_TOKEN='<user-supplied-token>'   # or chmod 600 ~/.agents/APPROVAL_TOKEN
+python $G approve --issue <id> --by user --minutes 30
 ```
 
-`approve` is a timestamped audit record, not a bypass. Hooks are optional —
-ask before installing; never install globally.
+`approve` records the token fingerprint and expiry; `guard-push` refuses if the
+token changes or is removed. `--by` is required and only `user` is accepted —
+an agent cannot approve its own push. Hooks are optional; ask before installing.
 
 ## Standards
 

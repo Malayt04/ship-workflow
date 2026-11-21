@@ -133,6 +133,7 @@ deterministic guardrail, not by prompting harder.
 | R-010 | 2026-11-21 | approved | user | one Git branch/commit standard across all harnesses; push still needs approval |
 | R-011 | 2026-11-21 | approved | user | repeated work becomes a reusable script |
 | R-012 | 2026-11-21 | approved | user | gated fast lane for small, low-risk changes |
+| R-013 | 2026-11-21 | approved | user | publish approval requires a user-supplied token; agent self-approval is rejected |
 
 ## Retired rules
 

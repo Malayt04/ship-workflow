@@ -127,5 +127,51 @@
     "cwd": "~/.agents/evals/fixtures/git-repo",
     "expect_exit": 0,
     "expect_out": "ALL IN SYNC"
+  },
+  {
+    "id": "git-approve-reject-agent",
+    "skill": "ship-git",
+    "command": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py approve --issue eval --by agent",
+    "env": {
+      "SHIP_APPROVAL_TOKEN": "user-token-123456",
+      "SHIP_GIT_APPROVAL_PATH": "~/.agents/evals/fixtures/approval-agent.json"
+    },
+    "expect_exit": 2,
+    "expect_out": "only user approval is allowed"
+  },
+  {
+    "id": "git-approve-requires-token",
+    "skill": "ship-git",
+    "command": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py approve --issue eval --by user",
+    "env": {
+      "SHIP_APPROVAL_TOKEN": "",
+      "SHIP_APPROVAL_TOKEN_FILE": "~/.agents/evals/fixtures/no-token",
+      "SHIP_GIT_APPROVAL_PATH": "~/.agents/evals/fixtures/approval-no-token.json"
+    },
+    "expect_exit": 2,
+    "expect_out": "approval token required"
+  },
+  {
+    "id": "git-approve-user-token",
+    "skill": "ship-git",
+    "command": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py approve --issue eval --by user --minutes 5",
+    "env": {
+      "SHIP_APPROVAL_TOKEN": "user-token-123456",
+      "SHIP_GIT_APPROVAL_PATH": "~/.agents/evals/fixtures/approval-valid.json"
+    },
+    "expect_exit": 0,
+    "expect_out": "APPROVAL RECORDED"
+  },
+  {
+    "id": "git-guard-valid-token",
+    "skill": "ship-git",
+    "setup": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py approve --issue eval --by user --minutes 5",
+    "command": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py guard-push --issue eval",
+    "env": {
+      "SHIP_APPROVAL_TOKEN": "user-token-123456",
+      "SHIP_GIT_APPROVAL_PATH": "~/.agents/evals/fixtures/approval-guard.json"
+    },
+    "expect_exit": 0,
+    "expect_out": "APPROVED"
   }
 ]
