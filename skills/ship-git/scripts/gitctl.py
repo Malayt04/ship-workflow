@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -37,6 +38,33 @@ PR_TITLE_RE = re.compile(
 
 def approval_path() -> Path:
     return Path(os.environ.get("SHIP_GIT_APPROVAL_PATH", Path.home() / ".agents" / "PUSH_APPROVAL.json")).expanduser()
+
+
+def token_file_path() -> Path:
+    return Path(os.environ.get("SHIP_APPROVAL_TOKEN_FILE", Path.home() / ".agents" / "APPROVAL_TOKEN")).expanduser()
+
+
+def current_token() -> tuple[str, str]:
+    """Return (token, source). The token must come from the user, not the agent."""
+    env_token = os.environ.get("SHIP_APPROVAL_TOKEN", "").strip()
+    if env_token:
+        return env_token, "env"
+    path = token_file_path()
+    if path.is_file():
+        mode = path.stat().st_mode & 0o777
+        if mode & 0o077:
+            die(f"token file is group/world readable ({oct(mode)}); run chmod 600 {path}")
+        return path.read_text().strip(), "file"
+    die(
+        "approval token required. Set SHIP_APPROVAL_TOKEN or create "
+        f"{path} (chmod 600) with a user-supplied token."
+    )
+
+
+def token_fingerprint(token: str) -> str:
+    if len(token) < 12:
+        die("approval token must be at least 12 characters")
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()[:16]
 
 
 def die(message: str, code: int = 2) -> None:
@@ -127,23 +155,28 @@ def cmd_pr_title(args: argparse.Namespace) -> None:
     print(f"PR TITLE OK: {title}")
 
 
-def approve_payload(args: argparse.Namespace) -> dict:
+def approve_payload(args: argparse.Namespace, token: str, source: str) -> dict:
     expires = datetime.now(timezone.utc) + timedelta(minutes=args.minutes)
     return {
         "issue": args.issue,
         "approved_by": args.by,
         "created": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "expires": expires.isoformat(timespec="seconds"),
+        "token_source": source,
+        "token_fp": token_fingerprint(token),
     }
 
 
 def cmd_approve(args: argparse.Namespace) -> None:
+    if args.by != "user":
+        die("only user approval is allowed; an agent cannot approve its own push")
+    token, source = current_token()
     path = approval_path()
     path.parent.mkdir(parents=True, exist_ok=True)
-    payload = approve_payload(args)
+    payload = approve_payload(args, token, source)
     path.write_text(json.dumps(payload, indent=2) + "\n")
     print(f"APPROVAL RECORDED for {args.issue} until {payload['expires']}")
-    print("Only proceed because the user explicitly asked you to publish.")
+    print(f"Only proceed because the user explicitly asked you to publish (token from {source}).")
 
 
 def cmd_guard_push(args: argparse.Namespace) -> None:
@@ -159,6 +192,13 @@ def cmd_guard_push(args: argparse.Namespace) -> None:
         die(f"approval file is unreadable: {exc}")
     if payload.get("approved_by") != "user":
         die("approval was not recorded as user-granted")
+    try:
+        token, _source = current_token()
+        expected_fp = token_fingerprint(token)
+    except SystemExit:
+        raise
+    if payload.get("token_fp") != expected_fp:
+        die("approval token fingerprint mismatch; token changed, was revoked, or approval was self-issued")
     try:
         expires = datetime.fromisoformat(payload["expires"])
     except (KeyError, ValueError):
@@ -221,7 +261,7 @@ def main() -> None:
 
     p = sub.add_parser("approve")
     p.add_argument("--issue", required=True)
-    p.add_argument("--by", default="user")
+    p.add_argument("--by", required=True, help="must be 'user'; no default")
     p.add_argument("--minutes", type=int, default=30)
     p.set_defaults(func=cmd_approve)
 
