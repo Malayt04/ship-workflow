@@ -111,5 +111,21 @@
     "command": "python3 ~/.agents/skills/ship-loop/scripts/loopctl.py --work-root ~/.agents/evals/fixtures/compact/.agent-work complete eval-fast intake",
     "expect_exit": 2,
     "expect_out": "## intake"
+  },
+  {
+    "id": "installer-dry-run",
+    "skill": "installer",
+    "command": "python3 ~/.agents/scripts/install.py --dry-run",
+    "cwd": "~/.agents/evals/fixtures/git-repo",
+    "expect_exit": 0,
+    "expect_out": "DRY RUN: 12 skill\\(s\\)"
+  },
+  {
+    "id": "cross-root-sync",
+    "skill": "installer",
+    "command": "python3 ~/.agents/scripts/validate-skills.py",
+    "cwd": "~/.agents/evals/fixtures/git-repo",
+    "expect_exit": 0,
+    "expect_out": "ALL IN SYNC"
   }
 ]

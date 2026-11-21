@@ -1,0 +1,23 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install skills and tooling
+        run: python3 -I scripts/install.py
+      - name: System health
+        run: python3 -I scripts/doctor.py
+      - name: Regression evals
+        run: python3 -I skills/ship-eval/scripts/evalctl.py run
+      - name: Checkout is unchanged
+        run: git diff --exit-code

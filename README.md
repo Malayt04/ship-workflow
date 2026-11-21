@@ -21,7 +21,10 @@ Copy `skills/` into your harness skills path (e.g. `~/.agents/skills`, mirrored 
 `~/.config/opencode/skills` and `~/.claude/skills`), then ask an agent to make a
 change; `ship-pipeline` runs automatically.
 ```bash
+python3 -I scripts/install.py          # copy skills/scripts/evals into harness roots
+python3 -I scripts/install.py --check  # verify all roots match this repo
 python3 -I scripts/doctor.py
 python3 -I skills/ship-eval/scripts/evalctl.py run
 ```
+`.github/workflows/validate.yml` runs the same install and checks on every push and PR.
 READY means ready for your review — never publish without fresh explicit approval.
