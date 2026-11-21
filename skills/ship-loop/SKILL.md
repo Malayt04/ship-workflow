@@ -30,7 +30,8 @@ python $L complete <issue> implement
 python $L complete <issue> impact      --artifact .agent-work/<issue>/impact.md
 python $L complete <issue> requirements --artifact .agent-work/<issue>/traceability.md
 python $L gate <issue> review --passed --evidence .agent-work/<issue>/evidence/review.txt
-python $L gate <issue> verify --passed --evidence .agent-work/<issue>/evidence/smoke.txt
+# Preferred: let the controller run the check and write the evidence itself.
+python $L gate <issue> verify --passed --run "pytest -q" --evidence .agent-work/<issue>/evidence/smoke.txt
 python $L complete <issue> handoff --artifact .agent-work/<issue>/handoff.md
 python $L handoff <issue>              # prints only when READY
 ```
@@ -44,8 +45,9 @@ python $L resume <issue>
 ```
 
 `--passed` requires an evidence file with a pass marker (default `passed`) and
-no failure markers. `--compact` uses one `fastlane.md` with `## <stage>` headings
-instead of separate artifacts (see `ship-fastlane`).
+no failure markers. With `--run`, loopctl executes the command (no shell), writes
+its output to `--evidence`, and fails the gate on a non-zero exit. `--compact`
+uses one `fastlane.md` with `## <stage>` headings instead of separate artifacts.
 
 ## Rules
 
@@ -73,5 +75,6 @@ the budget silently.
 python $L telemetry --root /path/to/repo/.agent-work --out ~/.agents/learning/telemetry-$(date +%F).md
 ```
 
-Reports loops by status/stage, gate results, loop-back reasons, and iteration
-utilisation. Feed it to `ship-teach`. Use `--format json` for scripting.
+Reports loops by status/stage, gate results, loop-back reasons, iteration
+utilisation and average seconds per stage. Feed it to `ship-teach`. Use
+`--format json` for scripting.

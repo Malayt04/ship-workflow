@@ -1,0 +1,19 @@
+{
+  "issue": "timed",
+  "created": "2026-11-21T00:00:00+00:00",
+  "max_iterations": 6,
+  "iteration": 1,
+  "stage": "verify",
+  "status": "RUNNING",
+  "compact": false,
+  "gates": {
+    "review": {"passed": true, "detail": ""},
+    "verify": {"passed": false, "detail": ""}
+  },
+  "timings": {
+    "intake": "2026-11-21T00:00:00+00:00",
+    "implement": "2026-11-21T00:00:02+00:00",
+    "impact": "2026-11-21T00:00:05+00:00"
+  },
+  "history": []
+}

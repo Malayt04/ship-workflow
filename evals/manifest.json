@@ -127,5 +127,80 @@
     "cwd": "~/.agents/evals/fixtures/git-repo",
     "expect_exit": 0,
     "expect_out": "ALL IN SYNC"
+  },
+  {
+    "id": "git-approve-reject-agent",
+    "skill": "ship-git",
+    "command": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py approve --issue eval --by agent",
+    "env": {
+      "SHIP_APPROVAL_TOKEN": "user-token-123456",
+      "SHIP_GIT_APPROVAL_PATH": "~/.agents/evals/fixtures/approval-agent.json"
+    },
+    "expect_exit": 2,
+    "expect_out": "only user approval is allowed"
+  },
+  {
+    "id": "git-approve-requires-token",
+    "skill": "ship-git",
+    "command": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py approve --issue eval --by user",
+    "env": {
+      "SHIP_APPROVAL_TOKEN": "",
+      "SHIP_APPROVAL_TOKEN_FILE": "~/.agents/evals/fixtures/no-token",
+      "SHIP_GIT_APPROVAL_PATH": "~/.agents/evals/fixtures/approval-no-token.json"
+    },
+    "expect_exit": 2,
+    "expect_out": "approval token required"
+  },
+  {
+    "id": "git-approve-user-token",
+    "skill": "ship-git",
+    "command": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py approve --issue eval --by user --minutes 5",
+    "env": {
+      "SHIP_APPROVAL_TOKEN": "user-token-123456",
+      "SHIP_GIT_APPROVAL_PATH": "~/.agents/evals/fixtures/approval-valid.json"
+    },
+    "expect_exit": 0,
+    "expect_out": "APPROVAL RECORDED"
+  },
+  {
+    "id": "git-guard-valid-token",
+    "skill": "ship-git",
+    "setup": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py approve --issue eval --by user --minutes 5",
+    "command": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py guard-push --issue eval",
+    "env": {
+      "SHIP_APPROVAL_TOKEN": "user-token-123456",
+      "SHIP_GIT_APPROVAL_PATH": "~/.agents/evals/fixtures/approval-guard.json"
+    },
+    "expect_exit": 0,
+    "expect_out": "APPROVED"
+  },
+  {
+    "id": "loop-gate-run-captures-evidence",
+    "skill": "ship-loop",
+    "setup": "cp ~/.agents/evals/fixtures/gate-run/loop-state.template.json ~/.agents/evals/fixtures/gate-run/.agent-work/gate-run/loop-state.json",
+    "command": "python3 ~/.agents/skills/ship-loop/scripts/loopctl.py --work-root ~/.agents/evals/fixtures/gate-run/.agent-work gate gate-run review --passed --run \"echo passed\" --evidence ~/.agents/evals/fixtures/gate-run/evidence/review.txt",
+    "expect_exit": 0,
+    "expect_out": "GATE PASS"
+  },
+  {
+    "id": "stack-detect-node",
+    "skill": "stack-detection",
+    "command": "python3 ~/.agents/scripts/detect-stack.py --cwd ~/.agents/evals/fixtures/stack-node",
+    "expect_exit": 0,
+    "expect_out": "STACK: node"
+  },
+  {
+    "id": "docs-links-valid",
+    "skill": "doc-checks",
+    "command": "python3 ~/.agents/scripts/check-docs.py --root ~/.agents",
+    "expect_exit": 0,
+    "expect_out": "DOC LINKS OK"
+  },
+  {
+    "id": "loop-stage-timing",
+    "skill": "ship-loop",
+    "command": "python3 ~/.agents/skills/ship-loop/scripts/loopctl.py telemetry --root ~/.agents/evals/fixtures/timing/.agent-work",
+    "expect_exit": 0,
+    "expect_out": "Stage timing: impact: 3s"
   }
 ]
