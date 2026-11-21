@@ -1,0 +1,23 @@
+# Track only our agent-workflow system; ignore everything else by default.
+/*
+!/.gitignore
+!/AGENTS.md
+!/AGENT_RULES.md
+!/README.md
+!/scripts/
+!/evals/
+!/skills/
+
+# Within skills/, track only ship-* (third-party wp-*/blueprint/synced/.system stay out)
+/skills/*
+!/skills/ship-*/
+
+# Never commit local state or secrets
+PUSH_APPROVAL.json
+__pycache__/
+*.pyc
+.DS_Store
+.agent-work/
+!/evals/fixtures/*/.agent-work/
+evals/last-report.md
+/evals/fixtures/git-repo/

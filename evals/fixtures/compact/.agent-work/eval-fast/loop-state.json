@@ -1,0 +1,11 @@
+{
+  "issue": "eval-fast",
+  "created": "2026-11-21T00:00:00+00:00",
+  "max_iterations": 2,
+  "iteration": 1,
+  "stage": "intake",
+  "status": "RUNNING",
+  "compact": true,
+  "gates": {"review": {"passed": false, "detail": ""}, "verify": {"passed": false, "detail": ""}},
+  "history": []
+}

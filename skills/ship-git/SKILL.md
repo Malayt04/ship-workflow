@@ -1,0 +1,50 @@
+---
+name: ship-git
+description: "Use for every branch creation, commit, PR title, and any push/PR/deploy intent in any repository or harness. Enforces one standard: branches named <type>(<base>)/<slug>, PR titles <type>(<base>): <name>, conventional commits, and an explicit push-approval guard. Trigger on branch/commit/push/PR intent or automatically inside ship-pipeline."
+---
+
+# Ship Git
+
+One Git standard across all harnesses, plus a guard around the only
+irreversible action: publishing.
+
+## Hard rule — never publish without approval
+
+**Never push, PR, merge, or deploy without explicit user consent.** Broad local
+access is not publishing consent. Local commits, branches, resets and deletes
+are fine.
+
+```bash
+G=~/.agents/skills/ship-git/scripts/gitctl.py
+python $G guard-push --issue <id>      # exit 2 without approval
+python $G approve --issue <id> --minutes 30   # only after user says "push"
+```
+
+`approve` is a timestamped audit record, not a bypass. Hooks are optional —
+ask before installing; never install globally.
+
+## Standards
+
+| Item | Form | Example |
+|---|---|---|
+| Branch | `<type>(<base>)/<kebab-slug>` | `feat(master)/add-vehicle-cpt` |
+| Commit | `<type>: <lowercase imperative>` | `feat: add public vehicle CPT` |
+| PR title | `<type>(<base>): <name>` | `feat(master): add public vehicle CPT` |
+
+Types: `feat`, `fix`, `perf`, `chore`, `docs`, `refactor`, `test`, `build`,
+`ci`, `style`, `revert`. Subject ≤72 chars, no trailing period, one change per
+commit; optional scope (`fix(rest): ...`) and `!` for breaking changes.
+
+Git refs cannot contain `:`, so branches use `/` before the slug. The colon is
+reserved for PR titles.
+
+```bash
+python $G branch feat master add-vehicle-cpt --dry-run
+python $G commit-msg --message "feat: add vehicle CPT"
+python $G pr-title --title "feat(master): add vehicle CPT"
+python $G install-hooks --repo /path/to/repo     # ask first
+```
+
+Drop `--dry-run` to create and switch the branch. Pipeline: stage 0 create
+branch, stage 2 validate each commit, stage 7 handoff states
+`NOT pushed, no PR opened` unless explicitly approved.

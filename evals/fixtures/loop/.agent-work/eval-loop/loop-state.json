@@ -1,0 +1,15 @@
+{
+  "issue": "eval-loop",
+  "created": "2026-11-21T00:00:00+00:00",
+  "max_iterations": 3,
+  "iteration": 1,
+  "stage": "review",
+  "status": "RUNNING",
+  "gates": {
+    "review": {"passed": false, "detail": ""},
+    "verify": {"passed": false, "detail": ""}
+  },
+  "history": [
+    {"at": "2026-11-21T00:00:00+00:00", "event": "init", "detail": "eval fixture"}
+  ]
+}

@@ -1,0 +1,115 @@
+[
+  {
+    "id": "git-branch-standard",
+    "skill": "ship-git",
+    "command": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py branch feat master add-vehicle-cpt --dry-run",
+    "cwd": "~/.agents/evals/fixtures/git-repo",
+    "expect_exit": 0,
+    "expect_out": "feat\\(master\\)/add-vehicle-cpt"
+  },
+  {
+    "id": "git-branch-reject-slug",
+    "skill": "ship-git",
+    "command": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py branch feat master Bad_Slug --dry-run",
+    "cwd": "~/.agents/evals/fixtures/git-repo",
+    "expect_exit": 2,
+    "expect_out": "slug must be lowercase"
+  },
+  {
+    "id": "git-commit-feat",
+    "skill": "ship-git",
+    "command": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py commit-msg --message \"feat: add public vehicle CPT\"",
+    "expect_exit": 0,
+    "expect_out": "COMMIT OK"
+  },
+  {
+    "id": "git-commit-perf",
+    "skill": "ship-git",
+    "command": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py commit-msg --message \"perf: cache dealer lookup\"",
+    "expect_exit": 0,
+    "expect_out": "COMMIT OK"
+  },
+  {
+    "id": "git-commit-reject",
+    "skill": "ship-git",
+    "command": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py commit-msg --message \"Added thing\"",
+    "expect_exit": 2,
+    "expect_out": "invalid commit subject"
+  },
+  {
+    "id": "git-pr-title-standard",
+    "skill": "ship-git",
+    "command": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py pr-title --title \"feat(master): add vehicle CPT\"",
+    "expect_exit": 0,
+    "expect_out": "PR TITLE OK"
+  },
+  {
+    "id": "git-pr-title-requires-base",
+    "skill": "ship-git",
+    "command": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py pr-title --title \"feat: add vehicle CPT\"",
+    "expect_exit": 2,
+    "expect_out": "invalid PR title"
+  },
+  {
+    "id": "git-guard-no-approval",
+    "skill": "ship-git",
+    "command": "python3 ~/.agents/skills/ship-git/scripts/gitctl.py guard-push --issue eval",
+    "env": {
+      "SHIP_GIT_APPROVAL_PATH": "~/.agents/evals/fixtures/no-approval.json"
+    },
+    "expect_exit": 2,
+    "expect_out": "NO PUSH APPROVAL"
+  },
+  {
+    "id": "loop-gate-requires-evidence",
+    "skill": "ship-loop",
+    "command": "python3 ~/.agents/skills/ship-loop/scripts/loopctl.py --work-root ~/.agents/evals/fixtures/loop/.agent-work gate eval-loop review --passed",
+    "expect_exit": 2,
+    "expect_out": "--evidence"
+  },
+  {
+    "id": "teach-digest",
+    "skill": "ship-teach",
+    "command": "python3 ~/.agents/skills/ship-teach/scripts/teach-digest.py --since 2026-11-21 --repo ~/.agents/evals/fixtures/teach --artifact-lines 5",
+    "expect_exit": 0,
+    "expect_out": "Agent work digest"
+  },
+  {
+    "id": "loop-telemetry",
+    "skill": "ship-loop",
+    "command": "python3 ~/.agents/skills/ship-loop/scripts/loopctl.py telemetry --root ~/.agents/evals/fixtures/loop/.agent-work",
+    "expect_exit": 0,
+    "expect_out": "Loops found"
+  },
+  {
+    "id": "fastlane-eligible",
+    "skill": "ship-fastlane",
+    "command": "python3 ~/.agents/skills/ship-fastlane/scripts/fastlane.py check --files README.md",
+    "cwd": "~/.agents/evals/fixtures/git-repo",
+    "expect_exit": 0,
+    "expect_out": "ELIGIBLE"
+  },
+  {
+    "id": "fastlane-reject-risky",
+    "skill": "ship-fastlane",
+    "command": "python3 ~/.agents/skills/ship-fastlane/scripts/fastlane.py check --files db/migrations/001.sql",
+    "cwd": "~/.agents/evals/fixtures/git-repo",
+    "expect_exit": 2,
+    "expect_out": "INELIGIBLE"
+  },
+  {
+    "id": "fastlane-reject-count",
+    "skill": "ship-fastlane",
+    "command": "python3 ~/.agents/skills/ship-fastlane/scripts/fastlane.py check --files a.py b.py c.py",
+    "cwd": "~/.agents/evals/fixtures/git-repo",
+    "expect_exit": 2,
+    "expect_out": "3 files changed"
+  },
+  {
+    "id": "loop-compact-requires-section",
+    "skill": "ship-loop",
+    "command": "python3 ~/.agents/skills/ship-loop/scripts/loopctl.py --work-root ~/.agents/evals/fixtures/compact/.agent-work complete eval-fast intake",
+    "expect_exit": 2,
+    "expect_out": "## intake"
+  }
+]
